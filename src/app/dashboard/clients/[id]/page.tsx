@@ -14,15 +14,28 @@ interface Client {
   goals?: string;
 }
 
+interface Session {
+  id: string;
+  session_date: string;
+  exercise_name: string;
+  sets?: number;
+  reps?: number;
+  weight?: string;
+  notes?: string;
+  status: string;
+}
+
 export default function ClientDetailPage() {
   const router = useRouter();
   const params = useParams();
   const clientId = params.id as string;
   const [client, setClient] = useState<Client | null>(null);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [coachId, setCoachId] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadClient = async () => {
+    const loadData = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
 
@@ -31,20 +44,29 @@ export default function ClientDetailPage() {
           return;
         }
 
-        const response = await fetch(`/api/clients/${clientId}`);
-        const data = await response.json();
+        setCoachId(user.id);
 
-        if (response.ok) {
-          setClient(data.client);
+        const clientResponse = await fetch(`/api/clients/${clientId}`);
+        const clientData = await clientResponse.json();
+
+        if (clientResponse.ok) {
+          setClient(clientData.client);
+        }
+
+        const sessionsResponse = await fetch(`/api/sessions?clientId=${clientId}`);
+        const sessionsData = await sessionsResponse.json();
+
+        if (sessionsResponse.ok) {
+          setSessions(sessionsData.sessions || []);
         }
       } catch (err) {
-        console.error('Error loading client:', err);
+        console.error('Error loading data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadClient();
+    loadData();
   }, [clientId, router]);
 
   if (loading) {
@@ -114,12 +136,86 @@ export default function ClientDetailPage() {
               Edit Client
             </Link>
             <Link
+              href={`/dashboard/clients/${client.id}/log-session`}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+            >
+              Log Session
+            </Link>
+            <Link
               href="/dashboard/clients"
               className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition"
             >
               Back
             </Link>
           </div>
+        </div>
+
+        <div className="mt-12">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6">Session History</h3>
+          {sessions.length === 0 ? (
+            <div className="bg-white rounded-lg shadow p-8 text-center">
+              <p className="text-gray-600 mb-4">No sessions logged yet</p>
+              <Link
+                href={`/dashboard/clients/${client.id}/log-session`}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition inline-block"
+              >
+                Log First Session
+              </Link>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Exercise
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Sets x Reps
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Weight
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {sessions.map((session) => (
+                    <tr key={session.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 text-gray-900">
+                        {new Date(session.session_date).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-gray-900">{session.exercise_name}</td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {session.sets && session.reps
+                          ? `${session.sets}x${session.reps}`
+                          : '—'}
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">{session.weight || '—'}</td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            session.status === 'completed'
+                              ? 'bg-green-100 text-green-800'
+                              : session.status === 'missed'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}
+                        >
+                          {session.status.charAt(0).toUpperCase() + session.status.slice(1)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>
