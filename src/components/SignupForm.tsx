@@ -56,6 +56,7 @@ export function SignupForm() {
         return;
       }
 
+      sessionStorage.setItem('signup-email', email);
       router.push(`/auth/verify?email=${encodeURIComponent(email)}`);
     } catch (err) {
       setError('An error occurred. Please try again.');
