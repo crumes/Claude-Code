@@ -87,6 +87,15 @@ export default function ClientDetailPage() {
     loadData();
   }, [clientId, router]);
 
+  const handleExport = async (type: 'sessions' | 'metrics' | 'all') => {
+    try {
+      const url = `/api/export/csv?clientId=${clientId}&type=${type}`;
+      window.location.href = url;
+    } catch (err) {
+      console.error('Error exporting data:', err);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -146,31 +155,54 @@ export default function ClientDetailPage() {
             )}
           </div>
 
-          <div className="mt-8 flex gap-4">
-            <Link
-              href={`/dashboard/clients/${client.id}/edit`}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition"
-            >
-              Edit Client
-            </Link>
-            <Link
-              href={`/dashboard/clients/${client.id}/log-session`}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
-            >
-              Log Session
-            </Link>
-            <Link
-              href={`/dashboard/clients/${client.id}/log-metric`}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
-            >
-              Log Metric
-            </Link>
-            <Link
-              href="/dashboard/clients"
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition"
-            >
-              Back
-            </Link>
+          <div className="mt-8 space-y-4">
+            <div className="flex gap-4 flex-wrap">
+              <Link
+                href={`/dashboard/clients/${client.id}/edit`}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition"
+              >
+                Edit Client
+              </Link>
+              <Link
+                href={`/dashboard/clients/${client.id}/log-session`}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+              >
+                Log Session
+              </Link>
+              <Link
+                href={`/dashboard/clients/${client.id}/log-metric`}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+              >
+                Log Metric
+              </Link>
+              <Link
+                href="/dashboard/clients"
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition"
+              >
+                Back
+              </Link>
+            </div>
+
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => handleExport('sessions')}
+                className="px-4 py-2 border-2 border-orange-300 text-orange-600 rounded-lg font-medium hover:bg-orange-50 transition text-sm"
+              >
+                Export Sessions
+              </button>
+              <button
+                onClick={() => handleExport('metrics')}
+                className="px-4 py-2 border-2 border-purple-300 text-purple-600 rounded-lg font-medium hover:bg-purple-50 transition text-sm"
+              >
+                Export Metrics
+              </button>
+              <button
+                onClick={() => handleExport('all')}
+                className="px-4 py-2 border-2 border-gray-300 text-gray-600 rounded-lg font-medium hover:bg-gray-50 transition text-sm"
+              >
+                Export All Data
+              </button>
+            </div>
           </div>
         </div>
 
