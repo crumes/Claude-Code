@@ -55,9 +55,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (profileError) {
+      console.error('Coach profile insert error:', profileError);
       await supabase.auth.admin.deleteUser(authData.user.id);
       return NextResponse.json(
-        { error: 'Failed to create coach profile' },
+        { error: profileError.message || 'Failed to create coach profile' },
         { status: 500 }
       );
     }
