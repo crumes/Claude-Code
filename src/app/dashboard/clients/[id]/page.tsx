@@ -25,12 +25,23 @@ interface Session {
   status: string;
 }
 
+interface Metric {
+  id: string;
+  metric_date: string;
+  metric_type: string;
+  metric_name: string;
+  value: number;
+  unit?: string;
+  notes?: string;
+}
+
 export default function ClientDetailPage() {
   const router = useRouter();
   const params = useParams();
   const clientId = params.id as string;
   const [client, setClient] = useState<Client | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [metrics, setMetrics] = useState<Metric[]>([]);
   const [coachId, setCoachId] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -58,6 +69,13 @@ export default function ClientDetailPage() {
 
         if (sessionsResponse.ok) {
           setSessions(sessionsData.sessions || []);
+        }
+
+        const metricsResponse = await fetch(`/api/metrics?clientId=${clientId}`);
+        const metricsData = await metricsResponse.json();
+
+        if (metricsResponse.ok) {
+          setMetrics(metricsData.metrics || []);
         }
       } catch (err) {
         console.error('Error loading data:', err);
@@ -142,6 +160,12 @@ export default function ClientDetailPage() {
               Log Session
             </Link>
             <Link
+              href={`/dashboard/clients/${client.id}/log-metric`}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+            >
+              Log Metric
+            </Link>
+            <Link
               href="/dashboard/clients"
               className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition"
             >
@@ -210,6 +234,66 @@ export default function ClientDetailPage() {
                           {session.status.charAt(0).toUpperCase() + session.status.slice(1)}
                         </span>
                       </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-12">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6">Metrics History</h3>
+          {metrics.length === 0 ? (
+            <div className="bg-white rounded-lg shadow p-8 text-center">
+              <p className="text-gray-600 mb-4">No metrics logged yet</p>
+              <Link
+                href={`/dashboard/clients/${client.id}/log-metric`}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition inline-block"
+              >
+                Log First Metric
+              </Link>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Type
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Metric
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Value
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Notes
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {metrics.map((metric) => (
+                    <tr key={metric.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 text-gray-900">
+                        {new Date(metric.metric_date).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">
+                        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                          {metric.metric_type.charAt(0).toUpperCase() +
+                            metric.metric_type.slice(1).replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-900">{metric.metric_name}</td>
+                      <td className="px-6 py-4 font-semibold text-gray-900">
+                        {metric.value}
+                        {metric.unit && ` ${metric.unit}`}
+                      </td>
+                      <td className="px-6 py-4 text-gray-600 text-sm">{metric.notes || '—'}</td>
                     </tr>
                   ))}
                 </tbody>
