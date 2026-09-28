@@ -3,6 +3,9 @@ dist
 .DS_Store
 .env
 .env.local
-
-# Ignore the output video from Git but not videos you import into src/.
+.next
 out
+*.log
+*.swp
+*.swo
+.vercel

@@ -1,35 +1,31 @@
 {
-  "name": ".rmtmp",
+  "name": "coach-progress-tracker",
   "version": "1.0.0",
-  "description": "My Remotion video",
+  "description": "Coach Progress Tracker - web app for personal trainers to log sessions and track client progress",
   "repository": {},
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@remotion/cli": "4.0.509",
-    "@remotion/tailwind-v4": "4.0.509",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "remotion": "4.0.509",
-    "tailwindcss": "4.0.0"
+    "@supabase/supabase-js": "^2.43.0",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^2.10.0"
   },
   "devDependencies": {
-    "@remotion/eslint-config-flat": "4.0.509",
-    "@types/react": "19.2.7",
-    "@types/web": "0.0.166",
-    "eslint": "9.19.0",
-    "prettier": "3.8.1",
-    "typescript": "5.9.3",
-    "vitest": "^5.0.2"
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "5.8.2"
   },
   "scripts": {
-    "dev": "remotion studio",
-    "build": "remotion bundle",
-    "upgrade": "remotion upgrade",
-    "lint": "eslint src && tsc",
-    "test": "vitest"
-  },
-  "sideEffects": [
-    "*.css"
-  ]
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --ext .ts,.tsx && tsc --noEmit",
+    "type-check": "tsc --noEmit"
+  }
 }
